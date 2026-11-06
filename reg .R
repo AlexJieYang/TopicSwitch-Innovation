@@ -1,21 +1,20 @@
+source("project_config.R")
 library(fixest)
 library(data.table)
 library(dplyr)
 
-data <- read.csv('switch4ref2.csv')
+data <- read.csv(input_path("switch4ref2.csv"))
 
 data <- data %>%
   mutate(
     P_Patent = as.numeric(Patent_Count > 0),
     P_NCT = as.numeric(NCT_Count > 0),
-    P_NEWS = as.numeric(NCT_Count > 0),
-    P_TWEETS = as.numeric(NCT_Count > 0),
-    Da = NDC / (NDC+NCC),
+    Da = ifelse(NDC + NCC > 0, NDC / (NDC + NCC), NA_real_),
     D = as.numeric(Disruption > 0),
     D5 = as.numeric(Disruption5 > 0),
     D10 = as.numeric(Disruption10 > 0),
     N = as.numeric(Atyp_Median_Z < 0),
-    E = EC / Citation_Count
+    E = ifelse(Citation_Count > 0, EC / Citation_Count, NA_real_)
   )
 
 colnames(data)
@@ -36,13 +35,13 @@ reg13<-feglm(D~switchScore+Funding+log(Reference_Count+1)+log(Team_Size)+Interna
 reg14<-feglm(D~switchScore+Funding+log(Reference_Count+1)+log(Team_Size)+International+InterDisTeam|AuthorID+Year+FieldID, data,family = "binomial")
 reg15<-feglm(D~switchScore+Funding+log(Reference_Count+1)+log(Team_Size)+International+InterDisTeam+log(Age+1)+FocalField+log(Past_Pub+1)+log(H.index+1)|AuthorID+Year+FieldID, data,family = "binomial")
 reg16<-feglm(D~switchScore+Funding+log(Reference_Count+1)+log(Team_Size)+International+InterDisTeam+log(Age+1)+FocalField+log(Past_Pub+1)+log(H.index+1)|AuthorID+Year+FieldID+JournalID, data,family = "binomial")
-write.csv(etable(reg1,reg2,reg3,reg4,reg5,reg6,reg7,reg8,reg9,reg10,reg11,reg12,reg13,reg14,reg15,reg16) , "F:/A J YANG PAPER/Working paper (under review)/NHB switch and disruption/Tables/reg11.csv")
+write.csv(etable(reg1,reg2,reg3,reg4,reg5,reg6,reg7,reg8,reg9,reg10,reg11,reg12,reg13,reg14,reg15,reg16) , table_path("reg11.csv"))
 
 reg1<-feglm(D~switchScore+Funding+log(Reference_Count+1)+log(Team_Size)+International+InterDisTeam+log(Age+1)+FocalField+log(Past_Pub+1)+log(H.index+1)|AuthorID+FieldID+JournalID, data,split=~Year,family = "binomial")
-write.csv(etable(reg1) , "F:/A J YANG PAPER/Working paper (under review)/NHB switch and disruption/Tables/reg12.csv")
+write.csv(etable(reg1) , table_path("reg12.csv"))
 
 reg1<-feglm(D~switchScore+Funding+log(Reference_Count+1)+log(Team_Size)+International+InterDisTeam+log(Age+1)+FocalField+log(Past_Pub+1)+log(H.index+1)|AuthorID+Year+JournalID, data,split=~FieldID,family = "binomial")
-write.csv(etable(reg1) , "F:/A J YANG PAPER/Working paper (under review)/NHB switch and disruption/Tables/reg13.csv")
+write.csv(etable(reg1) , table_path("reg13.csv"))
 
 reg1<-feols(log(Citation_Count+1)~switchScore, data, se = "hetero")
 reg2<-feols(log(Citation_Count+1)~switchScore|Year, data, se = "hetero")
@@ -68,7 +67,7 @@ reg21<-feols(E~switchScore+Funding+log(Reference_Count+1)+log(Team_Size)+Interna
 reg22<-feols(E~switchScore+Funding+log(Reference_Count+1)+log(Team_Size)+International+InterDisTeam|AuthorID+Year+FieldID, data)
 reg23<-feols(E~switchScore+Funding+log(Reference_Count+1)+log(Team_Size)+International+InterDisTeam+log(Age+1)+FocalField+log(Past_Pub+1)+log(H.index+1)|AuthorID+Year+FieldID, data)
 reg24<-feols(E~switchScore+Funding+log(Reference_Count+1)+log(Team_Size)+International+InterDisTeam+log(Age+1)+FocalField+log(Past_Pub+1)+log(H.index+1)|AuthorID+Year+FieldID+JournalID, data)
-write.csv(etable(reg1,reg2,reg3,reg4,reg5,reg6,reg7,reg8,reg9,reg10,reg11,reg12,reg13,reg14,reg15,reg16,reg17,reg18,reg19,reg20,reg21,reg22,reg23,reg24) , "F:/A J YANG PAPER/Working paper (under review)/NHB switch and disruption/Tables/reg2.csv")
+write.csv(etable(reg1,reg2,reg3,reg4,reg5,reg6,reg7,reg8,reg9,reg10,reg11,reg12,reg13,reg14,reg15,reg16,reg17,reg18,reg19,reg20,reg21,reg22,reg23,reg24) , table_path("reg2.csv"))
 
 reg1<-feols(RaoStirling_Ref~switchScore, data, se = "hetero")
 reg2<-feols(RaoStirling_Ref~switchScore|Year, data, se = "hetero")
@@ -86,4 +85,4 @@ reg13<-feglm(N~switchScore+Funding+log(Reference_Count+1)+log(Team_Size)+Interna
 reg14<-feglm(N~switchScore+Funding+log(Reference_Count+1)+log(Team_Size)+International+InterDisTeam|AuthorID+Year+FieldID, data,family = "binomial")
 reg15<-feglm(N~switchScore+Funding+log(Reference_Count+1)+log(Team_Size)+International+InterDisTeam+log(Age+1)+FocalField+log(Past_Pub+1)+log(H.index+1)|AuthorID+Year+FieldID, data,family = "binomial")
 reg16<-feglm(N~switchScore+Funding+log(Reference_Count+1)+log(Team_Size)+International+InterDisTeam+log(Age+1)+FocalField+log(Past_Pub+1)+log(H.index+1)|AuthorID+Year+FieldID+JournalID, data,family = "binomial")
-write.csv(etable(reg1,reg2,reg3,reg4,reg5,reg6,reg7,reg8,reg9,reg10,reg11,reg12,reg13,reg14,reg15,reg16) , "F:/A J YANG PAPER/Working paper (under review)/NHB switch and disruption/Tables/reg3.csv")
+write.csv(etable(reg1,reg2,reg3,reg4,reg5,reg6,reg7,reg8,reg9,reg10,reg11,reg12,reg13,reg14,reg15,reg16) , table_path("reg3.csv"))
